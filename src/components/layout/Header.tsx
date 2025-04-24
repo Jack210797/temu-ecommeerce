@@ -1,7 +1,11 @@
 'use client'
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { AlignJustify, Search, ShoppingCart } from 'lucide-react'
+import { AlignJustify, Router, Search, ShoppingCart } from 'lucide-react'
+import { User } from '@/generated/prisma'
+import { logoutUser } from '@/actions/auth'
+import React from 'react'
+import { useRouter } from 'next/navigation'
 
 const AnnousementBar = () => {
   return (
@@ -15,9 +19,14 @@ const AnnousementBar = () => {
   )
 }
 
-const Header = () => {
+type HeaderProps = {
+  user: Omit<User, 'passwordHash'> | null
+}
+
+const Header = ({ user }: HeaderProps) => {
   const [isOpen, setIsOpen] = useState<boolean>(true)
   const [prevScrollY, setPrevScrollY] = useState<number>(0)
+  const router = useRouter()
 
   useEffect(() => {
     const handleScroll = () => {
@@ -63,15 +72,47 @@ const Header = () => {
               </nav>
             </div>
 
-            <Link href="#">DEAL</Link>
+            <Link href="#" className="absolut left-1/2 -translate-x-1/2">
+              <span className="tracking-tight text-xl sm:text-2xl font-bold">DEAL</span>
+            </Link>
 
             <div className="flex flex-1 justify-end items-center gap-2 sm:gap-4">
               <button className="text-gray-700 hover:text-gray-900 hidden sm:block">
                 <Search />
               </button>
 
-              <Link href="/auth/sign-in">Sign In</Link>
-              <Link href="/auth/sign-up">Sign Up</Link>
+              {user ? (
+                <div className="flex items-center gap-2 sm:gap-4">
+                  <span className="text-sm  text-gray-700 hidden md:block">{user.email}</span>
+                  <Link
+                    href="#"
+                    className="text-xs sm:text-sm font-medium text-gray-700 hover:text-gray-900"
+                    onClick={async (e) => {
+                      e.preventDefault()
+                      await logoutUser()
+                      router.refresh()
+                    }}
+                  >
+                    {' '}
+                    Sign Out
+                  </Link>
+                </div>
+              ) : (
+                <React.Fragment>
+                  <Link
+                    href="/auth/sign-in"
+                    className="text-xs sm:text-sm font-medium text-gray-700 hover:text-gray-900"
+                  >
+                    Sign In
+                  </Link>
+                  <Link
+                    href="/auth/sign-up"
+                    className="text-xs sm:text-sm font-medium text-gray-700 hover:text-gray-900"
+                  >
+                    Sign Up
+                  </Link>
+                </React.Fragment>
+              )}
 
               <button className="text-gray-700 hover:text-gray-900 relative">
                 <ShoppingCart />

@@ -1,5 +1,8 @@
-import Image from 'next/image'
+import { getCurrentSession } from '@/actions/auth'
 
-export default function Home() {
-  return <div>Home</div>
+const Home = async () => {
+  const { user } = await getCurrentSession()
+  return <div>{JSON.stringify(user)}</div>
 }
+
+export default Home
